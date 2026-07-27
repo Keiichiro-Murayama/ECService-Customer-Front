@@ -30,20 +30,43 @@ export function useLogin() {
     setError(null);
 
     // 入力チェック:どちらか空なら API を呼ばずに促す
-    if (!mailAddress.trim() || !password) {
-      setError("メールアドレスとパスワードを入力してください。");
+    if (!mailAddress.trim()) {
+      setError("メールアドレスを入力してください。");
+      return;
+    }
+    if (!password.trim()) {
+      setError("パスワードを入力してください。");
+      return;
+    }
+    // メールアドレスの形式チェック（簡易）
+    if (mailAddress) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(mailAddress)) {
+        setError("メールアドレスの形式が正しくありません。");
+        return;
+      }
+    }
+    //パスワードは5-20文字の範囲であることを確認
+    if (password.length < 5 || password.length > 20) {
+      setError("パスワードは5〜20文字で入力してください。");
       return;
     }
 
     setSubmitting(true);
     try {
       const result = await signIn("credentials", {
-        mailAddress,
+        emailAddress: mailAddress,
         password,
         redirect: false,
       });
 
       if (!result || result.error) {
+        if (result?.error === "AUTH_BACKEND_UNAVAILABLE") {
+          setError(
+            "現在ログインサーバーに接続できません。時間をおいて再度お試しください。",
+          );
+          return;
+        }
         setError("メールアドレスまたはパスワードが正しくありません。");
         return;
       }
