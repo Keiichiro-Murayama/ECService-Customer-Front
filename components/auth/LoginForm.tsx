@@ -4,16 +4,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 type Props = {
-  /** ユーザー名(入力欄の現在値) */
-  username: string;
+  /** メールアドレス(入力欄の現在値) */
+  mailAddress: string;
   /** パスワード(入力欄の現在値) */
   password: string;
   /** ログイン処理の実行中フラグ */
   submitting: boolean;
   /** エラーメッセージ(あれば表示する) */
   error: string | null;
-  /** ユーザー名入力の変更を親へ通知する */
-  onUsernameChange: (value: string) => void;
+  /** メールアドレス入力の変更を親へ通知する */
+  onMailAddressChange: (value: string) => void;
   /** パスワード入力の変更を親へ通知する */
   onPasswordChange: (value: string) => void;
   /** ログイン実行を親へ通知する */
@@ -22,14 +22,14 @@ type Props = {
 
 /**
  * ログインフォームの見た目を担うコンポーネント
- * ユーザー名・パスワードの入力欄、ログインボタン、エラー表示を持つ
+ * メールアドレス・パスワードの入力欄、ログインボタン、エラー表示を持つ
  */
 export function LoginForm({
-  username,
+  mailAddress,
   password,
   submitting,
   error,
-  onUsernameChange,
+  onMailAddressChange,
   onPasswordChange,
   onSubmit,
 }: Props) {
@@ -37,17 +37,17 @@ export function LoginForm({
     <div className="space-y-5">
       {/* ユーザー名 */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium" htmlFor="username">
-          ユーザー名
+        <label className="text-sm font-medium" htmlFor="mailAddress">
+          メールアドレス
         </label>
         <Input
-          id="username"
-          value={username}
-          onChange={(e) => onUsernameChange(e.target.value)}
+          id="mailAddress"
+          value={mailAddress}
+          onChange={(e) => onMailAddressChange(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") onSubmit();
           }}
-          autoComplete="username"
+          autoComplete="email"
         />
       </div>
       {/* パスワード */}

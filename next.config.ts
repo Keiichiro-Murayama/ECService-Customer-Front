@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
          *   API専用の入り口として「/proxy-api/」を冠しています。
          */
         source: "/proxy-api/:path*",
-        destination: "http://20.78.59.178:8080/api/customer/:path*",
+        destination: "http://20.78.59.178/api/customer/:path*",
       },
     ];
   },
