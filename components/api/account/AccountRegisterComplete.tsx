@@ -1,0 +1,21 @@
+// app/account/register/_components/AccountRegisterComplete.tsx
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+
+export default function AccountRegisterComplete() {
+  return (
+    <Card className="p-6 text-center space-y-6">
+      <div className="space-y-1.5 py-4">
+        <h1 className="text-2xl font-bold text-primary">登録が完了しました</h1>
+        <p className="text-sm text-muted-foreground pt-2">
+          アカウントのご登録ありがとうございます。
+        </p>
+      </div>
+      <div className="pt-4">
+        <Button onClick={() => (window.location.href = "/")}>
+          トップへ戻る
+        </Button>
+      </div>
+    </Card>
+  );
+}

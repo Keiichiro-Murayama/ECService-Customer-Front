@@ -6,6 +6,7 @@ import type { NextConfig } from "next";
  * 安全にバックエンドAPIを呼び出すための中継ルールを定義
  */
 const nextConfig: NextConfig = {
+  basePath: "/customer",
   /* config options here */
   async rewrites() {
     return [
@@ -18,7 +19,19 @@ const nextConfig: NextConfig = {
          *   API専用の入り口として「/proxy-api/」を冠しています。
          */
         source: "/proxy-api/:path*",
-        destination: "http://20.78.59.178:8080/api/customer/:path*",
+        // destination: "http://20.78.59.178:8080/api/customer/:path*", //Azure用
+        destination: "http://localhost:5221/api/customer/:path*", //ローカル用
+      },
+      {
+        /**
+         * 管理者API用のプロキシ設定
+         * source: フロントエンド側で呼び出すURL（相対パス）
+         * destination: 実際にデータを取得しに行くバックエンドURL
+         * ※画面（/api/users/register）とのURL衝突を避けるため、
+         *   API専用の入り口として「/proxy-api/」を冠しています。
+         */
+        source: "/proxy-api/admin/:path*",
+        destination: "http://20.78.59.178/api/admin/:path*",
       },
     ];
   },

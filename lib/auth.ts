@@ -9,22 +9,25 @@ export const authOptions: NextAuthOptions = {
       name: "Credentials",
       // 入力フォームを定義する(APIのキー名に合わせる)
       credentials: {
-        username: { label: "Username", type: "text" },
+        emailAddress: { label: "Email Address", type: "text" },
         password: { label: "Password", type: "password" },
       },
       // 認証ロジックの実装
       async authorize(credentials) {
         try {
           // バックエンドAPIへ認証リクエストを送信
-          const res = await fetch("http://20.78.59.178/api/customer/login", {
-            method: "POST",
-            // APIの仕様に合わせる
-            body: JSON.stringify({
-              username: credentials?.username,
-              password: credentials?.password,
-            }),
-            headers: { "Content-Type": "application/json" },
-          });
+          const res = await fetch(
+            "http://20.78.59.178:8080/api/customer/login",
+            {
+              method: "POST",
+              // APIの仕様に合わせる
+              body: JSON.stringify({
+                emailAddress: credentials?.emailAddress,
+                password: credentials?.password,
+              }),
+              headers: { "Content-Type": "application/json" },
+            },
+          );
           const token = await res.json();
           // 認証成功(トークンが含まれている)ならユーザーオブジェクトを返す
           if (res.ok && token) {

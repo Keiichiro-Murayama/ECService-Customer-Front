@@ -110,6 +110,7 @@ jobs:
             echo "=== Local customer frontend check ==="
 
             sleep 5
+
             curl --fail --show-error http://127.0.0.1:3001/customer/
 
             echo "=== Customer frontend deployment completed ==="
