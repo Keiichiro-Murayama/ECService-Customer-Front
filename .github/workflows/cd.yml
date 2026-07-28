@@ -37,6 +37,10 @@ jobs:
             sudo mkdir -p /var/www/ecservice-customer-front
             sudo chown -R "$(whoami)":"$(whoami)" /var/www/ecservice-customer-front
 
+            echo "=== Stopping customer frontend service ==="
+
+            sudo systemctl stop ecservice-customer-front.service || true
+
             echo "=== Removing old customer frontend files ==="
 
             rm -rf /var/www/ecservice-customer-front/*
