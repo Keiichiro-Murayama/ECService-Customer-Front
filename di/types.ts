@@ -9,6 +9,9 @@ export const TYPES = {
   IPaymentMethodRepository: Symbol.for("IPaymentMethodRepository"),
   IProductRepository: Symbol.for("IProductRepository"),
 
+
   // サービス層
   ISearchProductsService: Symbol.for("ISearchProductsService"),
+  IGetOrderHistoriesService: Symbol.for("IGetOrderHistoriesService"),
+  IGetOrderDetailsService: Symbol.for("IGetOrderDetailsService"),
 } as const;

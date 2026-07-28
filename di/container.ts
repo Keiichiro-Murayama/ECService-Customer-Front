@@ -5,11 +5,17 @@ import { TYPES } from "@/di/types";
 import type { ICategoryRepository } from "@/interfaces/ICategoryRepository";
 import type { IProductRepository } from "@/interfaces/IProductRepository";
 import type { ISearchProductsService } from "@/interfaces/ISearchProductsService";
+import type { IGetOrderHistoriesService } from "@/interfaces/IGetOrderHistoriesService";
+import type { IGetOrderDetailsService } from "@/interfaces/IGetOrderDetailsService";
 
 // 実装クラス
 import { CategoryRepository } from "@/infrastructures/CategoryRepository";
 import { ProductRepository } from "@/infrastructures/ProductRepository";
 import { SearchProductsService } from "@/services/SearchProductsService";
+import { GetOrderHistoriesService } from "@/services/GetOrderHistoriesService";
+import { GetOrderDetailsService } from "@/services/GetOrderDetailsService";
+import { IOrderRepository } from "@/interfaces/IOrderRepository";
+import { OrderRepository } from "@/infrastructures/OrderRepository";
 
 /**
  * DIコンテナ
@@ -26,9 +32,14 @@ container.bind<ICategoryRepository>(TYPES.ICategoryRepository).to(CategoryReposi
 
 container.bind<IProductRepository>(TYPES.IProductRepository).to(ProductRepository);
 
+container.bind<IOrderRepository>(TYPES.IOrderRepository).to(OrderRepository);
+
 /*
  * Serviceの登録
  */
 container.bind<ISearchProductsService>(TYPES.ISearchProductsService).to(SearchProductsService);
+container.bind<IGetOrderHistoriesService>(TYPES.IGetOrderHistoriesService).to(GetOrderHistoriesService);
+container.bind<IGetOrderDetailsService>(TYPES.IGetOrderDetailsService).to(GetOrderDetailsService);
+
 
 export { container };
