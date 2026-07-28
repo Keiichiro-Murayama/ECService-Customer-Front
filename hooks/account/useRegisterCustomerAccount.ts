@@ -187,11 +187,12 @@ export const useRegisterCustomerAccount = () => {
         customerAccountRegistration,
       );
       setIsComplete(true);
-    } catch (err: any) {
-      // サーバー側や通信エラー時のハンドリング
-      setError(err.message || "登録処理中にエラーが発生しました。");
-    } finally {
-      setIsLoading(false);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("登録処理中にエラーが発生しました。");
+      }
     }
   }, [registerCustomerAccountService, customerAccountRegistration]);
 
