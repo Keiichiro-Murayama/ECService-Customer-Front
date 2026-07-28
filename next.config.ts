@@ -6,7 +6,6 @@ import type { NextConfig } from "next";
  * 安全にバックエンドAPIを呼び出すための中継ルールを定義
  */
 const nextConfig: NextConfig = {
-  basePath: "/customer",
   /* config options here */
   async rewrites() {
     return [
