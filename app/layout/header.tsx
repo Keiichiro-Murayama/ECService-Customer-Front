@@ -10,70 +10,18 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { PencilRuler } from "lucide-react";
+import { PencilRuler, ShoppingCart } from "lucide-react";
 import { useLogout } from "@/hooks/auth/useLogout";
 
 type HeaderProps = {
-  showControls?: boolean;
+  isLogin?: boolean;
 };
 
-const productItems = [
-  {
-    title: "商品登録",
-    href: "/admin/product/add",
-  },
-  {
-    title: "商品検索",
-    href: "/admin/product",
-  },
-];
-
-function ListItem({
-  title,
-  href,
-  ...props
-}: React.ComponentPropsWithoutRef<"li"> & { href: string }) {
-  return (
-    <li {...props}>
-      <NavigationMenuLink asChild>
-        <Link href={href}>
-          <div className="leading-none font-medium">{title}</div>
-        </Link>
-      </NavigationMenuLink>
-    </li>
-  );
-}
-
-function MenuGroup({
-  label,
-  items,
-}: {
-  label: string;
-  items: { title: string; href: string }[];
-}) {
-  return (
-    <NavigationMenuItem>
-      <NavigationMenuTrigger className="text-md">{label}</NavigationMenuTrigger>
-      <NavigationMenuContent className="bg-tertiary shadow-xl data-[motion=from-end]:slide-in-from-right-0 data-[motion=from-start]:slide-in-from-left-0 data-[motion=to-end]:slide-out-to-right-0 data-[motion=to-start]:slide-out-to-left-0 group-data-[viewport=false]/navigation-menu:data-open:animate-none group-data-[viewport=false]/navigation-menu:data-closed:animate-none group-data-[viewport=false]/navigation-menu:data-open:opacity-100 group-data-[viewport=false]/navigation-menu:data-closed:opacity-0 transition-opacity duration-150">
-        <ul className="grid gap-2 p-1 md:w-[150px]">
-          {items.map((item) => (
-            <ListItem
-              key={item.title}
-              title={item.title}
-              href={item.href}
-            ></ListItem>
-          ))}
-        </ul>
-      </NavigationMenuContent>
-    </NavigationMenuItem>
-  );
-}
-
-export default function Header({ showControls = true }: HeaderProps) {
+export default function Header({ isLogin = true }: HeaderProps) {
   const { logout } = useLogout();
 
   return (
-    <header className="flex items-center justify-between bg-tertiary py-4 text-primary">
+    <header className="flex items-center  bg-tertiary py-4 text-primary">
       <div
         className="px-4 font-bold"
         onClick={() => (window.location.href = "/")}
@@ -82,26 +30,57 @@ export default function Header({ showControls = true }: HeaderProps) {
         <span className="px-1 py-1">フルネス文具 管理画面</span>
       </div>
 
-      {showControls && (
-        <nav className="px-4">
-          <NavigationMenu viewport={false}>
-            <NavigationMenuList className="gap-1">
-              <MenuGroup label="商品管理" items={productItems} />
-            </NavigationMenuList>
-          </NavigationMenu>
-        </nav>
-      )}
+      <nav className="px-4">
+        {/* 常時表示。押せば飛ぶリンク/ */}
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link href="/">商品検索</Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+      </nav>
 
-      {showControls && (
-        <div className="px-4 font-bold">
+      <div className="ml-auto px-4 font-bold flex items-center gap-4">
+        {/* カートマーク　常時表示 右寄せ */}
+        <div className="ml-auto">
+          <Link href="/cart">
+            <ShoppingCart />
+          </Link>
+        </div>
+
+        {/* アカウント登録 ログアウト時のみ */}
+        {!isLogin && (
+          <Link
+            href="/customer/register"
+            className="text-primary rounded-md px-2 py-1 hover:text-primary/80"
+          >
+            アカウント登録
+          </Link>
+        )}
+
+        {/* ログインボタン　ログアウト時のみ表示 */}
+        {!isLogin && (
+          <Link
+            href="/customer/login"
+            className="text-primary rounded-md px-2 py-1 hover:text-primary/80"
+          >
+            ログイン
+          </Link>
+        )}
+
+        {/* ログアウトボタン　ログイン時のみ表示 */}
+        {isLogin && (
           <button
-            className="text-secondary-foreground rounded-md bg-secondary px-2 py-1 hover:bg-secondary/80 hover:text-secondary-foreground/80"
+            className="text-primary rounded-md px-2 py-1 hover:text-primary/80"
             onClick={logout}
           >
             ログアウト
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </header>
   );
 }

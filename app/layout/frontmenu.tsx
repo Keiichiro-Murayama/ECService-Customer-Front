@@ -14,12 +14,12 @@ export default function FrontMenuLayout({
   const { status } = useSession();
 
   const isLoginPage = pathname === "/customer/login";
-  // const showHeaderControls = status === "authenticated" && !isLoginPage;
-  const showHeaderControls = true; // 開発中は常にヘッダーのコントロールを表示する
+  const showHeaderControls = status === "authenticated" && !isLoginPage;
+  // const showHeaderControls = true; // 開発中は常にヘッダーのコントロールを表示する
 
   return (
     <>
-      <Header showControls={showHeaderControls} />
+      <Header isLogin={showHeaderControls} />
       <main className="flex-1 container mx-auto p-4 md:p-8">{children}</main>
       <Footer />
     </>
