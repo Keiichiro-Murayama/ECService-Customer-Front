@@ -16,20 +16,50 @@ const authMiddleware = withAuth({
   },
 });
 
+// export default function middleware(
+//   req: NextRequestWithAuth,
+//   event: NextFetchEvent,
+// ) {
+//   // 開発中は認証チェックをスキップする
+//   if (process.env.NODE_ENV === "development") {
+//     return NextResponse.next();
+//   }
+
+//   return authMiddleware(req, event);
+// }
+
+// export const config = {
+//   matcher: [
+//     "/((?!customer/login|customer/form|proxy-api/accounts|api/auth|_next/static|_next/image|favicon.ico).*)",
+//   ],
+// };
+
 export default function middleware(
   req: NextRequestWithAuth,
   event: NextFetchEvent,
 ) {
-  // 開発中は認証チェックをスキップする
+  // 1. 開発中は認証チェックをスキップする
   if (process.env.NODE_ENV === "development") {
     return NextResponse.next();
   }
 
+  // 2. 認証を「絶対に不要」にしたいパスをコード側で明示的に除外する
+  const { pathname } = req.nextUrl;
+  if (pathname.startsWith("/proxy-api/accounts")) {
+    return NextResponse.next(); // 認証をスルーしてバックエンドへ通す
+  }
+
+  // 3. それ以外は通常の認証ミドルウェアを実行
   return authMiddleware(req, event);
 }
 
+// config 側はシンプルに「アセット（静的ファイル）以外すべて」にする
 export const config = {
   matcher: [
-    "/((?!customer/login|customer/form|proxy-api/accounts|api/auth|_next/static|_next/image|favicon.ico).*)",
+    /*
+     * _next/static, _next/image, favicon.ico などの静的ファイル以外の
+     * すべてのリクエストパスにマッチさせる
+     */
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
