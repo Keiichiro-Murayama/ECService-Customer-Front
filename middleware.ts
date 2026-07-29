@@ -56,10 +56,6 @@ export default function middleware(
 // config 側はシンプルに「アセット（静的ファイル）以外すべて」にする
 export const config = {
   matcher: [
-    /*
-     * _next/static, _next/image, favicon.ico などの静的ファイル以外の
-     * すべてのリクエストパスにマッチさせる
-     */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!login(?:/|$)|customer/form(?:/|$)|proxy-api/accounts(?:/|$)|api/auth(?:/|$)|_next/static|_next/image|favicon.ico).*)",
   ],
 };
