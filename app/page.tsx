@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useHome } from "@/hooks/useHome";
-import type { Product } from "@/models/Product";
+import type { Product } from "@/models/Product"
+import Link from "next/link";
 import {
   Carousel,
   CarouselContent,
@@ -52,7 +53,16 @@ export default function MenuPage() {
                   <p className="text-primary font-bold">
                     {product.productName}
                   </p>
-                  <p className="text-tertiary">{product.price}円</p>
+                  <div className="flex items-center justify-between mt-2">
+  <p className="text-tertiary">{product.price}円</p>
+
+  <Link
+    href={`/products/detail/${product.productUuid}`}
+    className="px-3 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 transition"
+  >
+    詳細
+  </Link>
+</div>
                 </div>
               </CarouselItem>
             ))}
