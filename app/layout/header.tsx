@@ -36,7 +36,7 @@ export default function Header({ isLogin = true }: HeaderProps) {
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
-                <Link href="/">商品検索</Link>
+                <Link href="/products/search">商品検索</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
           </NavigationMenuList>
@@ -64,10 +64,20 @@ export default function Header({ isLogin = true }: HeaderProps) {
         {/* ログインボタン　ログアウト時のみ表示 */}
         {!isLogin && (
           <Link
-            href="/customer/login"
+            href="/login"
             className="text-primary rounded-md px-2 py-1 hover:text-primary/80"
           >
             ログイン
+          </Link>
+        )}
+
+        {/* ログインボタン　ログアウト時のみ表示 */}
+        {isLogin && (
+          <Link
+            href="/purchase/search"
+            className="text-primary rounded-md px-2 py-1 hover:text-primary/80"
+          >
+            購入履歴
           </Link>
         )}
 
