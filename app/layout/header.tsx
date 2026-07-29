@@ -46,7 +46,7 @@ export default function Header({ isLogin = true }: HeaderProps) {
       <div className="ml-auto px-4 font-bold flex items-center gap-4">
         {/* カートマーク　常時表示 右寄せ */}
         <div className="ml-auto">
-          <Link href="/cart">
+          <Link href="/purchase/input">
             <ShoppingCart />
           </Link>
         </div>
@@ -74,7 +74,7 @@ export default function Header({ isLogin = true }: HeaderProps) {
         {/* ログインボタン　ログアウト時のみ表示 */}
         {isLogin && (
           <Link
-            href="/purchase/search"
+            href="/purchase/history"
             className="text-primary rounded-md px-2 py-1 hover:text-primary/80"
           >
             購入履歴

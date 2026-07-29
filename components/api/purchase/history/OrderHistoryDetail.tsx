@@ -219,7 +219,7 @@ export const OrderHistoryDetail = ({
 
                         <Button asChild>
 
-                            <Link href="/purchase/search">
+                            <Link href="/purchase/history">
                                 戻る
                             </Link>
 

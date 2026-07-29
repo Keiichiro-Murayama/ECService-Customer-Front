@@ -89,7 +89,7 @@ export const OrderHistory = () => {
                                     <TableCell className="text-right">
                                         <Button asChild>
                                             <Link
-                                                href={`/purchase/search/${history.orderUuid}?orderId=${history.orderId}`}
+                                                href={`/purchase/history/${history.orderUuid}?orderId=${history.orderId}`}
                                             >
                                                 詳細
                                             </Link>

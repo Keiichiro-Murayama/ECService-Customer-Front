@@ -1,4 +1,4 @@
-import { OrderHistory } from "@/components/api/purchase/search/OrderHistory";
+import { OrderHistory } from "@/components/api/purchase/history/OrderHistory";
 
 /**
  * 購入履歴一覧画面
