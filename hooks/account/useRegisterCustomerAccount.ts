@@ -178,23 +178,37 @@ export const useRegisterCustomerAccount = () => {
   }, []);
 
   // --- 注入されたサービスを呼び出して本登録を行う処理 ---
-  const handleRegister = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // DIコンテナから取得したサービスメソッドを実行
-      await registerCustomerAccountService.registerCustomerAccount(
-        customerAccountRegistration,
-      );
-      setIsComplete(true);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("登録処理中にエラーが発生しました。");
-      }
+ // --- 注入されたサービスを呼び出して本登録を行う処理 ---
+const handleRegister = useCallback(async () => {
+  setIsLoading(true);
+  setError(null);
+
+  try {
+    // DIコンテナから取得したサービスメソッドを実行
+    await registerCustomerAccountService.registerCustomerAccount(
+      customerAccountRegistration,
+    );
+
+    // 登録成功
+    setIsComplete(true);
+
+  } catch (err: unknown) {
+
+    // エラー時は入力画面へ戻す
+    setIsSuccess(false);
+    setIsComplete(false);
+
+    if (err instanceof Error) {
+      setError(err.message);
+    } else {
+      setError("登録処理中にエラーが発生しました。");
     }
-  }, [registerCustomerAccountService, customerAccountRegistration]);
+
+  } finally {
+    // 成功・失敗どちらでもローディング解除
+    setIsLoading(false);
+  }
+}, [registerCustomerAccountService, customerAccountRegistration]);
 
   return {
     customerAccountRegistration,

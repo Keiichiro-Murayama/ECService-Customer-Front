@@ -1,4 +1,4 @@
-import { OrderHistoryDetail } from "@/components/api/purchase/search/OrderHistoryDetail";
+import { OrderHistoryDetail } from "@/components/api/purchase/history/OrderHistoryDetail";
 
 type Props = {
     params: Promise<{
