@@ -17,7 +17,9 @@ export const authOptions: NextAuthOptions = {
         try {
           // バックエンドAPIへ認証リクエストを送信
           const res = await fetch(
-            "http://20.78.59.178:8080/api/customer/login",
+            //"http://20.78.59.178:8080/api/customer/login",
+            "http://localhost:5221/api/customer/login",
+
             {
               method: "POST",
               // APIの仕様に合わせる

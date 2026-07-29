@@ -18,7 +18,7 @@ export default function AccountRegisterComplete() {
         >
           トップへ戻る
         </Button>
-        <Button onClick={() => (window.location.href = "/account/login")}>
+        <Button onClick={() => (window.location.href = "/login")}>
           ログイン
         </Button>
       </div>
