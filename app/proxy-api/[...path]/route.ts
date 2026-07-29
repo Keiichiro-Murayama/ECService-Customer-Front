@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
  *
  * Azure VM上では、Nginxを経由せずASP.NETへ直接接続する。
  */
-const backendApiUrl = process.env.BACKEND_API_URL ?? "http://127.0.0.1:5000";
+const backendApiUrl = process.env.BACKEND_API_URL ?? "http://127.0.0.1:5001";
 
 /**
  * Next.jsからASP.NET APIへリクエストを中継する
