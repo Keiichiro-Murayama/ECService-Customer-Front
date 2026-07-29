@@ -218,16 +218,7 @@ export const ProductDetailView = ({
             </Alert>
           )}
 
-          <div className="mt-auto flex flex-col gap-3 pt-8 sm:flex-row">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleBack}
-            >
-              商品検索へ戻る
-            </Button>
-
+          <div className="mt-auto flex flex-col gap-3 pt-8 sm:flex-col">
             <Button
               type="button"
               className="w-full"
@@ -235,6 +226,15 @@ export const ProductDetailView = ({
               onClick={handleAddToCart}
             >
               カートに入れる
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleBack}
+            >
+              商品検索へ戻る
             </Button>
           </div>
         </div>
