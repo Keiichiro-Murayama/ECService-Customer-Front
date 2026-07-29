@@ -3,9 +3,9 @@ import Link from "next/link";
 const footerLinks = [
   { label: "トップ", href: "/" },
   { label: "アカウント登録", href: "/account/form" },
-  { label: "ログイン", href: "/" },
-  { label: "商品検索", href: "/" },
-  { label: "買い物カゴ", href: "/" },
+  { label: "ログイン", href: "/login" },
+  { label: "商品検索", href: "/products/search" },
+  { label: "買い物カゴ", href: "/purchase/input" },
 ] as const;
 
 export default function Footer() {

@@ -22,7 +22,7 @@ function LoginPageContent() {
     ) {
       hasHandledLogoutToast.current = true;
       toast.success("ログアウトしました。", { duration: 2000 });
-      router.replace("/customer/login");
+      router.replace("/login");
     }
   }, [router, searchParams]);
 

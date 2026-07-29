@@ -50,39 +50,53 @@ export class ProductRepository implements IProductRepository {
   }
 
   /**
-   * 指定した商品の詳細情報を取得する
-   * @param productUuid 商品UUID
-   * @returns 商品詳細
-   */
+  * 商品UUIDを指定して商品詳細を取得する
+  *
+  * @param productUuid 商品UUID
+  * @returns 商品詳細
+  */
   async getProductByUuid(
     productUuid: string,
   ): Promise<ProductDetail> {
     const normalizedProductUuid = productUuid.trim();
 
-    if (normalizedProductUuid.length === 0) {
-      throw new Error("商品UUIDを指定してください。");
+    if (!normalizedProductUuid) {
+      throw new Error("商品UUIDが指定されていません。");
     }
 
-    const url =
-      `${this.endpoint}/info?productUuid=${encodeURIComponent(
+    const response = await fetch(
+      `/proxy-api/products/${encodeURIComponent(
         normalizedProductUuid,
-      )}`;
-
-    const response = await fetch(url, {
-      method: "GET",
-      credentials: "include",
-    });
+      )}`,
+      {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+      },
+    );
 
     if (!response.ok) {
       throw new Error(
-        await this.getErrorMessage(
-          response,
-          `商品詳細の取得に失敗しました。(status : ${response.status})`,
-        ),
+        `商品詳細の取得に失敗しました。(status : ${response.status})`,
       );
     }
 
-    return (await response.json()) as ProductDetail;
+    const productDetail: unknown = await response.json();
+
+    if (
+      typeof productDetail !== "object" ||
+      productDetail === null ||
+      !("productUuid" in productDetail) ||
+      !("productName" in productDetail) ||
+      !("price" in productDetail) ||
+      !("imageUrl" in productDetail) ||
+      !("stock" in productDetail) ||
+      !("categoryUuid" in productDetail)
+    ) {
+      throw new Error("商品詳細のレスポンス形式が不正です。");
+    }
+
+    return productDetail as ProductDetail;
   }
 
   /**

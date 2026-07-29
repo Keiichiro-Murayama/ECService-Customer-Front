@@ -24,10 +24,10 @@ export default function Header({ isLogin = true }: HeaderProps) {
     <header className="flex items-center  bg-tertiary py-4 text-primary">
       <div
         className="px-4 font-bold"
-        onClick={() => (window.location.href = "/")}
+        onClick={() => (window.location.href = "/products/search")}
       >
         <PencilRuler className="inline-block mr-2" />
-        <span className="px-1 py-1">フルネス文具 管理画面</span>
+        <span className="px-1 py-1">フルネス文具</span>
       </div>
 
       <nav className="px-4">
@@ -36,7 +36,7 @@ export default function Header({ isLogin = true }: HeaderProps) {
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
-                <Link href="/">商品検索</Link>
+                <Link href="/products/search">商品検索</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
           </NavigationMenuList>
@@ -64,10 +64,20 @@ export default function Header({ isLogin = true }: HeaderProps) {
         {/* ログインボタン　ログアウト時のみ表示 */}
         {!isLogin && (
           <Link
-            href="/customer/login"
+            href="/login"
             className="text-primary rounded-md px-2 py-1 hover:text-primary/80"
           >
             ログイン
+          </Link>
+        )}
+
+        {/* ログインボタン　ログアウト時のみ表示 */}
+        {isLogin && (
+          <Link
+            href="/purchase/search"
+            className="text-primary rounded-md px-2 py-1 hover:text-primary/80"
+          >
+            購入履歴
           </Link>
         )}
 
