@@ -30,6 +30,6 @@ export default function middleware(
 
 export const config = {
   matcher: [
-    "/((?!admin/login|api/auth|_next/static|_next/image|favicon.ico).*)",
-  ], // ミドルウェアを適用するパスを指定
+    "/((?!customer/login|customer/form|api/auth|_next/static|_next/image|favicon.ico).*)",
+  ],
 };
