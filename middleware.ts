@@ -30,6 +30,6 @@ export default function middleware(
 
 export const config = {
   matcher: [
-    "/((?!customer/login|customer/form|api/auth|_next/static|_next/image|favicon.ico).*)",
+    "/((?!customer/login|customer/form|proxy-api/accounts|api/auth|_next/static|_next/image|favicon.ico).*)",
   ],
 };
