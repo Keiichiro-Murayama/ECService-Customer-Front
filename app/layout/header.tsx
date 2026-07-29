@@ -54,7 +54,7 @@ export default function Header({ isLogin = true }: HeaderProps) {
         {/* アカウント登録 ログアウト時のみ */}
         {!isLogin && (
           <Link
-            href="/customer/register"
+            href="/customer/form"
             className="text-primary rounded-md px-2 py-1 hover:text-primary/80"
           >
             アカウント登録
