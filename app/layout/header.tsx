@@ -24,7 +24,7 @@ export default function Header({ isLogin = true }: HeaderProps) {
     <header className="flex items-center  bg-tertiary py-4 text-primary">
       <div
         className="px-4 font-bold"
-        onClick={() => (window.location.href = "/products/search")}
+        onClick={() => (window.location.href = "/")}
       >
         <PencilRuler className="inline-block mr-2" />
         <span className="px-1 py-1">フルネス文具</span>
