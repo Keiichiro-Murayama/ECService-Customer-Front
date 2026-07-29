@@ -51,7 +51,7 @@ jobs:
           host: ${{ secrets.ECSERVICE_AZURE_HOST }}
           username: ${{ secrets.ECSERVICE_AZURE_USER }}
           key: ${{ secrets.ECSERVICE_AZURE_SECRET }}
-          source: "app,components,di,hooks,infrastructures,interfaces,lib,models,public,services,types,middleware.ts,next.config.ts,package.json,package-lock.json,postcss.config.mjs,tsconfig.json,eslint.config.mjs"          
+          source: "app,components,di,hooks,infrastructures,interfaces,lib,models,public,services,types,proxy.ts,next.config.ts,package.json,package-lock.json,postcss.config.mjs,tsconfig.json,eslint.config.mjs"
           target: "/var/www/ecservice-customer-front"
           overwrite: true
 
