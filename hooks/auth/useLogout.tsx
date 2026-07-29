@@ -27,7 +27,7 @@ export function useLogout() {
       document.cookie = "access_token=; path=/; Max-Age=0";
 
       // 3. ログアウト完了フラグをクエリで渡してログイン画面へ遷移する
-      router.push("/customer/login?loggedOut=1");
+      router.push("/login?loggedOut=1");
     } catch (error) {
       console.error("ログアウトに失敗しました:", error);
       toast.error("ログアウトに失敗しました。");
