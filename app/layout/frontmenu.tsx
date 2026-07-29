@@ -18,10 +18,12 @@ export default function FrontMenuLayout({
   // const showHeaderControls = true; // 開発中は常にヘッダーのコントロールを表示する
 
   return (
-    <>
-      <Header isLogin={showHeaderControls} />
-      <main className="flex-1 container mx-auto md:p-4">{children}</main>
-      <Footer />
-    </>
-  );
+  <>
+    <Header isLogin={showHeaderControls} />
+    <main className="flex-1 container mx-auto md:p-4">
+      {children}
+    </main>
+    <Footer isLogin={showHeaderControls} />
+  </>
+);
 }

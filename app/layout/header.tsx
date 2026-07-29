@@ -4,11 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { PencilRuler, ShoppingCart } from "lucide-react";
 import { useLogout } from "@/hooks/auth/useLogout";
@@ -17,21 +15,22 @@ type HeaderProps = {
   isLogin?: boolean;
 };
 
-export default function Header({ isLogin = true }: HeaderProps) {
+export default function Header({ isLogin = false }: HeaderProps) {
   const { logout } = useLogout();
 
   return (
-    <header className="flex items-center  bg-tertiary py-4 text-primary">
+    <header className="flex items-center bg-tertiary py-4 text-primary">
+      {/* ロゴ */}
       <div
-        className="px-4 font-bold"
-        onClick={() => (window.location.href = "/products/search")}
+        className="px-4 font-bold cursor-pointer"
+        onClick={() => (window.location.href = "/")}
       >
         <PencilRuler className="inline-block mr-2" />
         <span className="px-1 py-1">フルネス文具</span>
       </div>
 
+      {/* 商品検索 */}
       <nav className="px-4">
-        {/* 常時表示。押せば飛ぶリンク/ */}
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
@@ -43,52 +42,49 @@ export default function Header({ isLogin = true }: HeaderProps) {
         </NavigationMenu>
       </nav>
 
-      <div className="ml-auto px-4 font-bold flex items-center gap-4">
-        {/* カートマーク　常時表示 右寄せ */}
-        <div className="ml-auto">
-          <Link href="/purchase/input">
-            <ShoppingCart />
-          </Link>
-        </div>
+      {/* 右側メニュー */}
+      <div className="ml-auto flex items-center gap-4 px-4">
+        {/* カートは常時表示 */}
+        <Link href="/purchase/input">
+          <ShoppingCart />
+        </Link>
 
-        {/* アカウント登録 ログアウト時のみ */}
+        {/* ===== ログアウト中のみ ===== */}
         {!isLogin && (
-          <Link
-            href="/customer/register"
-            className="text-primary rounded-md px-2 py-1 hover:text-primary/80"
-          >
-            アカウント登録
-          </Link>
+          <>
+            <Link
+              href="/account/form"
+              className="rounded-md px-2 py-1 hover:text-primary/80"
+            >
+              アカウント登録
+            </Link>
+
+            <Link
+              href="/login"
+              className="rounded-md px-2 py-1 hover:text-primary/80"
+            >
+              ログイン
+            </Link>
+          </>
         )}
 
-        {/* ログインボタン　ログアウト時のみ表示 */}
-        {!isLogin && (
-          <Link
-            href="/login"
-            className="text-primary rounded-md px-2 py-1 hover:text-primary/80"
-          >
-            ログイン
-          </Link>
-        )}
-
-        {/* ログインボタン　ログアウト時のみ表示 */}
+        {/* ===== ログイン中のみ ===== */}
         {isLogin && (
-          <Link
-            href="/purchase/history"
-            className="text-primary rounded-md px-2 py-1 hover:text-primary/80"
-          >
-            購入履歴
-          </Link>
-        )}
+          <>
+            <Link
+              href="/purchase/history"
+              className="rounded-md px-2 py-1 hover:text-primary/80"
+            >
+              購入履歴
+            </Link>
 
-        {/* ログアウトボタン　ログイン時のみ表示 */}
-        {isLogin && (
-          <button
-            className="text-primary rounded-md px-2 py-1 hover:text-primary/80"
-            onClick={logout}
-          >
-            ログアウト
-          </button>
+            <button
+              onClick={logout}
+              className="rounded-md px-2 py-1 hover:text-primary/80"
+            >
+              ログアウト
+            </button>
+          </>
         )}
       </div>
     </header>
