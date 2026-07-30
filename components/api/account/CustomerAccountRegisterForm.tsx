@@ -73,7 +73,7 @@ export default function CustomerAccountRegisterForm({
               name="address2"
               value={data.address2}
               onChange={onChange}
-              placeholder="マンション渋谷 101号室"
+              placeholder="大阪府大阪市北区2-22-2"
             />
           </div>
           <div className="space-y-2">
