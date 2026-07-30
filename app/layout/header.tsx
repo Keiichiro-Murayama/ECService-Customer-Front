@@ -35,19 +35,6 @@ export default function Header({ isLogin = false }: HeaderProps) {
         <span className="px-1 py-1">フルネス文具</span>
       </div>
 
-      {/* 商品検索
-      <nav className="px-4">
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link href="/products/search">商品検索</Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-      </nav> */}
-
       {/* 右側メニュー */}
       <div className="ml-auto flex items-center gap-4 px-4">
         {/* 商品検索 */}
