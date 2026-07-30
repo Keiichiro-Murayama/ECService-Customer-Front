@@ -16,6 +16,8 @@ type Props = {
   onMailAddressChange: (value: string) => void;
   /** パスワード入力の変更を親へ通知する */
   onPasswordChange: (value: string) => void;
+  /** 新規会員登録画面へ遷移する */
+  onRegister: () => void;
   /** ログイン実行を親へ通知する */
   onSubmit: () => void;
 };
@@ -32,6 +34,7 @@ export function LoginForm({
   onMailAddressChange,
   onPasswordChange,
   onSubmit,
+  onRegister,
 }: Props) {
   return (
     <div className="space-y-5">
@@ -73,6 +76,22 @@ export function LoginForm({
         <LogIn className="mr-1 h-4 w-4" />
         {submitting ? "ログイン中..." : "ログイン"}
       </Button>
+      {/* 新規会員登録 */}
+      <div className="border-t pt-5 text-center">
+        <p className="mb-3 text-sm text-muted-foreground">
+          初めてご利用の方
+        </p>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={onRegister}
+        >
+          新規会員登録はこちら
+        </Button>
+      </div>
     </div>
+
   );
 }

@@ -41,6 +41,9 @@ function LoginPageContent() {
           onMailAddressChange={login.setMailAddress}
           onPasswordChange={login.setPassword}
           onSubmit={login.submit}
+          onRegister={() => {
+            router.push("/account/form");
+          }}
         />
       </Card>
     </div>
