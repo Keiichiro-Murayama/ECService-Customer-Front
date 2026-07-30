@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 
 import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import type { IPurchaseConfirmService } from "@/interfaces/IPurchaseConfirmService";
 import type { IPurchaseService } from "@/interfaces/IPurchaseService";
 import type { CartItem } from "@/models/CartItem";
 import type { PaymentMethod } from "@/models/PaymentMethod";
 import type { PurchaseResponse } from "@/models/PurchaseResponse";
-import { useRouter } from "next/navigation";
+
 
 /**
  * 購入確認ServiceをDIコンテナから取得する
@@ -50,8 +50,9 @@ const getErrorMessage = (
  * 購入確認画面の状態と処理を管理するカスタムフック
  */
 export const usePurchaseConfirm = () => {
-  const router = useRouter();
+
   const { status } = useSession();
+
   /** カート内の商品一覧 */
   const [items, setItems] = useState<CartItem[]>([]);
 
@@ -94,76 +95,90 @@ export const usePurchaseConfirm = () => {
     useState<string | null>(null);
 
   /**
+   * ログイン画面へ遷移する
+   */
+  const redirectToLogin =
+    async (): Promise<void> => {
+      await signOut({
+        redirect: false,
+      });
+
+      document.cookie =
+        "access_token=; path=/; Max-Age=0; SameSite=Lax";
+
+      window.location.assign(
+        "/login?callbackUrl=%2Fpurchase%2Fconfirm",
+      );
+    };
+
+  /**
    * 購入確認画面の初期データを取得する
    */
   useEffect(() => {
     let isActive = true;
 
-    const initialize = async (): Promise<void> => {
-      setIsLoading(true);
-      setLoadError(null);
-      setValidationError(null);
-      setPurchaseError(null);
+    const initialize =
+      async (): Promise<void> => {
+        setIsLoading(true);
+        setLoadError(null);
+        setValidationError(null);
+        setPurchaseError(null);
 
-      try {
-        const initialData =
-          await purchaseConfirmService.getInitialData();
+        try {
+          const initialData =
+            await purchaseConfirmService
+              .getInitialData();
 
-        if (!isActive) {
-          return;
-        }
+          if (!isActive) {
+            return;
+          }
 
-        /*
-         * 現時点では「現金」のみ選択可能とする
-         */
-        const selectablePaymentMethods =
-          initialData.paymentMethods.filter(
-            (paymentMethod) =>
-              paymentMethod.paymentMethodName ===
-              "現金",
+          const selectablePaymentMethods =
+            initialData.paymentMethods.filter(
+              (paymentMethod) =>
+                paymentMethod
+                  .paymentMethodName === "現金",
+            );
+
+          setItems(initialData.items);
+          setPaymentMethods(
+            selectablePaymentMethods,
+          );
+          setTotalQuantity(
+            initialData.totalQuantity,
+          );
+          setTotalPrice(
+            initialData.totalPrice,
+          );
+          setSelectedPaymentMethodId("");
+        } catch (cause: unknown) {
+          console.error(
+            "購入確認情報の取得に失敗しました。",
+            cause,
           );
 
-        setItems(initialData.items);
-        setPaymentMethods(
-          selectablePaymentMethods,
-        );
-        setTotalQuantity(
-          initialData.totalQuantity,
-        );
-        setTotalPrice(initialData.totalPrice);
+          if (!isActive) {
+            return;
+          }
 
-        /*
-         * 支払い方法は初期状態では未選択とする
-         */
-        setSelectedPaymentMethodId("");
-      } catch (cause: unknown) {
-        console.error(
-          "購入確認情報の取得に失敗しました。",
-          cause,
-        );
+          setItems([]);
+          setPaymentMethods([]);
+          setSelectedPaymentMethodId("");
+          setTotalQuantity(0);
+          setTotalPrice(0);
 
-        if (!isActive) {
-          return;
+          setLoadError(
+            getErrorMessage(
+              cause,
+              "購入確認情報の取得に失敗しました。",
+            ),
+          );
+        } finally {
+          if (isActive) {
+            setIsLoading(false);
+          }
         }
-
-        setItems([]);
-        setPaymentMethods([]);
-        setSelectedPaymentMethodId("");
-        setTotalQuantity(0);
-        setTotalPrice(0);
-
-        setLoadError(
-          getErrorMessage(
-            cause,
-            "購入確認情報の取得に失敗しました。",
-          ),
-        );
-      } finally {
-        if (isActive) {
-          setIsLoading(false);
-        }
-      }
-    };
+      };
 
     void initialize();
 
@@ -174,8 +189,6 @@ export const usePurchaseConfirm = () => {
 
   /**
    * 支払い方法を変更する
-   *
-   * @param paymentMethodId 支払い方法ID
    */
   const changePaymentMethod = (
     paymentMethodId: string,
@@ -185,20 +198,12 @@ export const usePurchaseConfirm = () => {
 
     setPurchaseError(null);
 
-    /*
-     * 未選択へ戻した場合
-     */
     if (!normalizedPaymentMethodId) {
       setSelectedPaymentMethodId("");
       setValidationError(null);
-
       return;
     }
 
-    /*
-     * APIから取得した支払い方法に
-     * 存在するIDか確認する
-     */
     const existsPaymentMethod =
       paymentMethods.some(
         (paymentMethod) =>
@@ -208,25 +213,20 @@ export const usePurchaseConfirm = () => {
 
     if (!existsPaymentMethod) {
       setSelectedPaymentMethodId("");
-
       setValidationError(
         "支払い方法を選択してください。",
       );
-
       return;
     }
 
     setSelectedPaymentMethodId(
       normalizedPaymentMethodId,
     );
-
     setValidationError(null);
   };
 
   /**
    * 購入内容を検証する
-   *
-   * @returns 正常な場合true
    */
   const validate = (): boolean => {
     setValidationError(null);
@@ -236,7 +236,6 @@ export const usePurchaseConfirm = () => {
       setValidationError(
         "カートに商品がありません。",
       );
-
       return false;
     }
 
@@ -244,7 +243,6 @@ export const usePurchaseConfirm = () => {
       setValidationError(
         "支払い方法を選択してください。",
       );
-
       return false;
     }
 
@@ -259,7 +257,6 @@ export const usePurchaseConfirm = () => {
       setValidationError(
         "支払い方法を選択してください。",
       );
-
       return false;
     }
 
@@ -268,16 +265,11 @@ export const usePurchaseConfirm = () => {
 
   /**
    * 商品の購入を確定する
-   *
-   * @returns
-   * 購入成功時は購入結果、
-   * 失敗時はnull
    */
   const purchase =
-    async (): Promise<PurchaseResponse | null> => {
-      /*
-       * 二重送信を防止する
-       */
+    async (): Promise<
+      PurchaseResponse | null
+    > => {
       if (isPurchasing) {
         return null;
       }
@@ -286,18 +278,12 @@ export const usePurchaseConfirm = () => {
         return null;
       }
 
-      /*
-       * 未ログインの場合はログイン画面へ遷移する
-       */
       if (status === "loading") {
         return null;
       }
 
       if (status === "unauthenticated") {
-        router.push(
-          "/login?callbackUrl=/purchase/confirm",
-        );
-
+        await redirectToLogin();
         return null;
       }
 
@@ -311,10 +297,6 @@ export const usePurchaseConfirm = () => {
             items,
           );
 
-        /*
-         * PurchaseService側で
-         * 購入成功後にカートが空にされる
-         */
         setItems([]);
         setTotalQuantity(0);
         setTotalPrice(0);
@@ -326,26 +308,26 @@ export const usePurchaseConfirm = () => {
           cause,
         );
 
-        /*
-         * 未ログインまたはJWT期限切れの場合は
-         * 自作ログイン画面へ遷移する
-         */
-        if (
-          cause instanceof Error &&
-          cause.message === "UNAUTHORIZED"
-        ) {
-          router.replace(
-            "/login?callbackUrl=/purchase/confirm",
-          );
+        const errorMessage =
+          cause instanceof Error
+            ? cause.message
+            : String(cause);
 
+        console.log(
+          "購入エラーメッセージ:",
+          errorMessage,
+        );
+
+        if (
+          errorMessage === "UNAUTHORIZED"
+        ) {
+          await redirectToLogin();
           return null;
         }
 
         setPurchaseError(
-          getErrorMessage(
-            cause,
-            "商品の購入に失敗しました。",
-          ),
+          errorMessage ||
+          "商品の購入に失敗しました。",
         );
 
         return null;
@@ -357,16 +339,18 @@ export const usePurchaseConfirm = () => {
   /**
    * 入力エラーを消去する
    */
-  const clearValidationError = (): void => {
-    setValidationError(null);
-  };
+  const clearValidationError =
+    (): void => {
+      setValidationError(null);
+    };
 
   /**
    * 購入エラーを消去する
    */
-  const clearPurchaseError = (): void => {
-    setPurchaseError(null);
-  };
+  const clearPurchaseError =
+    (): void => {
+      setPurchaseError(null);
+    };
 
   return {
     items,
