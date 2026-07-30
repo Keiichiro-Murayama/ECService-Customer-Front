@@ -8,7 +8,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-import { PencilRuler, ShoppingCart } from "lucide-react";
+import { PencilRuler, ShoppingCart, SearchIcon } from "lucide-react";
 import { useLogout } from "@/hooks/auth/useLogout";
 
 type HeaderProps = {
@@ -29,7 +29,7 @@ export default function Header({ isLogin = false }: HeaderProps) {
         <span className="px-1 py-1">フルネス文具</span>
       </div>
 
-      {/* 商品検索 */}
+      {/* 商品検索
       <nav className="px-4">
         <NavigationMenu>
           <NavigationMenuList>
@@ -40,12 +40,22 @@ export default function Header({ isLogin = false }: HeaderProps) {
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
-      </nav>
+      </nav> */}
 
       {/* 右側メニュー */}
       <div className="ml-auto flex items-center gap-4 px-4">
+        {/* 商品検索 */}
+        <Link
+          href="/products/search"
+          className="rounded-md px-2 py-1 hover:text-primary/80"
+        >
+          <SearchIcon />
+        </Link>
         {/* カートは常時表示 */}
-        <Link href="/purchase/input">
+        <Link
+          href="/purchase/input"
+          className="rounded-md px-2 py-1 hover:text-primary/80"
+        >
           <ShoppingCart />
         </Link>
 
