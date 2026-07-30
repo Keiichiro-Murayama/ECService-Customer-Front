@@ -8,7 +8,13 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-import { PencilRuler, ShoppingCart, SearchIcon } from "lucide-react";
+import {
+  PencilRuler,
+  ShoppingCart,
+  SearchIcon,
+  UserRoundPlus,
+  ReceiptText,
+} from "lucide-react";
 import { useLogout } from "@/hooks/auth/useLogout";
 
 type HeaderProps = {
@@ -66,7 +72,7 @@ export default function Header({ isLogin = false }: HeaderProps) {
               href="/account/form"
               className="rounded-md px-2 py-1 hover:text-primary/80"
             >
-              アカウント登録
+              <UserRoundPlus className="inline-block mr-2" />
             </Link>
 
             <Link
@@ -85,7 +91,7 @@ export default function Header({ isLogin = false }: HeaderProps) {
               href="/purchase/history"
               className="rounded-md px-2 py-1 hover:text-primary/80"
             >
-              購入履歴
+              <ReceiptText className="inline-block mr-2" />
             </Link>
 
             <button
