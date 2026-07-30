@@ -51,8 +51,8 @@ export default function MenuPage() {
                     alt={product.productName}
                   />
                   <p className="text-black font-bold">{product.productName}</p>
-                  <div className="flex items-center text-muted justify-between mt-2">
-                    <p className="text-muted">{product.price}円</p>
+                  <div className="flex items-center text-gray-500 justify-between mt-2">
+                    <p className="text-gray-500">{product.price}円</p>
 
                     <Link
                       href={`/products/detail/${product.productUuid}`}
