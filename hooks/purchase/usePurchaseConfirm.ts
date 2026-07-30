@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 
 import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
-import { signIn, useSession, } from "next-auth/react";
+import { useSession, } from "next-auth/react";
 import type { IPurchaseConfirmService } from "@/interfaces/IPurchaseConfirmService";
 import type { IPurchaseService } from "@/interfaces/IPurchaseService";
 import type { CartItem } from "@/models/CartItem";
 import type { PaymentMethod } from "@/models/PaymentMethod";
 import type { PurchaseResponse } from "@/models/PurchaseResponse";
+import { useRouter } from "next/navigation";
 
 /**
  * 購入確認ServiceをDIコンテナから取得する
@@ -49,6 +50,7 @@ const getErrorMessage = (
  * 購入確認画面の状態と処理を管理するカスタムフック
  */
 export const usePurchaseConfirm = () => {
+  const router = useRouter();
   const { status } = useSession();
   /** カート内の商品一覧 */
   const [items, setItems] = useState<CartItem[]>([]);
@@ -292,9 +294,9 @@ export const usePurchaseConfirm = () => {
       }
 
       if (status === "unauthenticated") {
-        await signIn(undefined, {
-          callbackUrl: "/purchase/confirm",
-        });
+        router.push(
+          "/login?callbackUrl=/purchase/confirm",
+        );
 
         return null;
       }
