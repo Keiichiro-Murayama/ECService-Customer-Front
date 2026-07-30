@@ -31,7 +31,7 @@ export default function MenuPage() {
       {/* 2. 画像は余計なマージンをつけず、w-full で配置（これでヘッダーの幅と揃います） */}
       <img
         className="w-full h-[400px] object-cover"
-        src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiR9Ve2HcRXqq2UqV8esb50Y7hQuaSlJG4NB9hFiTICoqZ915ju4z332yD1SthhGigHitO1_EJ2CJgm8hfH4dbjWdtTI4juiSZCldpn8P23_78BhV5Xu0xpfxFG66fEHUlMmx39sgig2e0L/s1600/bunbougu_enogu.png"
+        src="https://ecservicestorage2026.blob.core.windows.net/photos/stationary.jpg"
         alt="トップ画像"
       />
 
