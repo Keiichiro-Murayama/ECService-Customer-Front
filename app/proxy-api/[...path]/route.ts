@@ -1,12 +1,18 @@
 import { getToken } from "next-auth/jwt";
-import { NextRequest, NextResponse } from "next/server";
+import {
+  NextRequest,
+  NextResponse,
+} from "next/server";
 
 /**
  * バックエンドAPIのベースURL
  *
- * Azure VM上では、Nginxを経由せずASP.NETへ直接接続する。
+ * Azure VM上では、
+ * Nginxを経由せずASP.NETへ直接接続する。
  */
-const backendApiUrl = process.env.BACKEND_API_URL ?? "http://127.0.0.1:5001";
+const backendApiUrl =
+  process.env.BACKEND_API_URL ??
+  "http://127.0.0.1:5001";
 
 /**
  * Next.jsからASP.NET APIへリクエストを中継する
@@ -37,7 +43,9 @@ const proxyRequest = async (
    * 認証不要
    */
   const isAccountRegistration =
-    request.method === "POST" && path.length === 1 && firstPath === "accounts";
+    request.method === "POST" &&
+    path.length === 1 &&
+    firstPath === "accounts";
 
   /**
    * 商品検索・商品詳細取得
@@ -47,7 +55,9 @@ const proxyRequest = async (
    *
    * 認証不要
    */
-  const isProductRequest = request.method === "GET" && firstPath === "products";
+  const isProductRequest =
+    request.method === "GET" &&
+    firstPath === "products";
 
   /**
    * カテゴリ一覧取得
@@ -57,16 +67,32 @@ const proxyRequest = async (
    * 認証不要
    */
   const isCategoryRequest =
-    request.method === "GET" && firstPath === "categories";
+    request.method === "GET" &&
+    firstPath === "categories";
+
+  /**
+   * 支払い方法一覧取得
+   *
+   * GET /proxy-api/payments
+   *
+   * 購入確認画面は未ログインでも
+   * 表示できるため認証不要
+   */
+  const isPaymentMethodRequest =
+    request.method === "GET" &&
+    firstPath === "payments";
 
   /**
    * 認証不要のAPI
    *
-   * ordersはここに含めないため、
+   * ordersは含めないため、
    * 購入確定と購入履歴は認証必須になる。
    */
   const isPublicRequest =
-    isAccountRegistration || isProductRequest || isCategoryRequest;
+    isAccountRegistration ||
+    isProductRequest ||
+    isCategoryRequest ||
+    isPaymentMethodRequest;
 
   /**
    * NextAuthのセッションCookieから
@@ -81,7 +107,8 @@ const proxyRequest = async (
    * auth.tsで保存した
    * ASP.NET用のJWTを取得する
    */
-  const accessToken = nextAuthToken?.token;
+  const accessToken =
+    nextAuthToken?.token;
 
   /**
    * 公開API以外は認証必須
@@ -92,11 +119,15 @@ const proxyRequest = async (
    */
   if (
     !isPublicRequest &&
-    (typeof accessToken !== "string" || accessToken.trim() === "")
+    (
+      typeof accessToken !== "string" ||
+      accessToken.trim() === ""
+    )
   ) {
     return NextResponse.json(
       {
-        message: "認証情報を取得できません。再度ログインしてください。",
+        message:
+          "認証情報を取得できません。再度ログインしてください。",
       },
       {
         status: 401,
@@ -111,29 +142,38 @@ const proxyRequest = async (
    *        ↓
    * /api/customer/products
    */
-  const backendUrl = new URL(`/api/customer/${path.join("/")}`, backendApiUrl);
+  const backendUrl = new URL(
+    `/api/customer/${path.join("/")}`,
+    backendApiUrl,
+  );
 
   /**
    * categoryUuidなどの
    * クエリパラメータを引き継ぐ
    */
-  backendUrl.search = request.nextUrl.search;
+  backendUrl.search =
+    request.nextUrl.search;
 
   const headers = new Headers();
 
   /**
    * Content-Typeを引き継ぐ
    */
-  const contentType = request.headers.get("content-type");
+  const contentType =
+    request.headers.get("content-type");
 
   if (contentType) {
-    headers.set("Content-Type", contentType);
+    headers.set(
+      "Content-Type",
+      contentType,
+    );
   }
 
   /**
    * Acceptを引き継ぐ
    */
-  const accept = request.headers.get("accept");
+  const accept =
+    request.headers.get("accept");
 
   if (accept) {
     headers.set("Accept", accept);
@@ -148,45 +188,67 @@ const proxyRequest = async (
     typeof accessToken === "string" &&
     accessToken.trim() !== ""
   ) {
-    headers.set("Authorization", `Bearer ${accessToken}`);
+    headers.set(
+      "Authorization",
+      `Bearer ${accessToken}`,
+    );
   }
 
   /**
    * GETとHEAD以外は
    * リクエストボディを転送する
    */
-  const hasBody = request.method !== "GET" && request.method !== "HEAD";
+  const hasBody =
+    request.method !== "GET" &&
+    request.method !== "HEAD";
 
   try {
-    const backendResponse = await fetch(backendUrl, {
-      method: request.method,
-      headers,
-      body: hasBody ? await request.arrayBuffer() : undefined,
-      cache: "no-store",
-    });
+    const backendResponse =
+      await fetch(backendUrl, {
+        method: request.method,
+        headers,
+        body: hasBody
+          ? await request.arrayBuffer()
+          : undefined,
+        cache: "no-store",
+      });
 
-    const responseHeaders = new Headers();
+    const responseHeaders =
+      new Headers();
 
     /**
      * バックエンドから返された
      * Content-Typeを引き継ぐ
      */
-    const responseContentType = backendResponse.headers.get("content-type");
+    const responseContentType =
+      backendResponse.headers.get(
+        "content-type",
+      );
 
     if (responseContentType) {
-      responseHeaders.set("Content-Type", responseContentType);
+      responseHeaders.set(
+        "Content-Type",
+        responseContentType,
+      );
     }
 
-    return new NextResponse(backendResponse.body, {
-      status: backendResponse.status,
-      headers: responseHeaders,
-    });
+    return new NextResponse(
+      backendResponse.body,
+      {
+        status: backendResponse.status,
+        headers: responseHeaders,
+      },
+    );
   } catch (error) {
-    console.error("バックエンドAPIへの接続に失敗しました。", error);
+    console.error(
+      "バックエンドAPIへの接続に失敗しました。",
+      error,
+    );
 
     return NextResponse.json(
       {
-        message: "バックエンドAPIとの通信に失敗しました。",
+        message:
+          "バックエンドAPIとの通信に失敗しました。",
       },
       {
         status: 502,
