@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
-import { useSession, } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import type { IPurchaseConfirmService } from "@/interfaces/IPurchaseConfirmService";
 import type { IPurchaseService } from "@/interfaces/IPurchaseService";
 import type { CartItem } from "@/models/CartItem";
@@ -325,6 +325,21 @@ export const usePurchaseConfirm = () => {
           "商品の購入に失敗しました。",
           cause,
         );
+
+        /*
+         * 未ログインまたはJWT期限切れの場合は
+         * 自作ログイン画面へ遷移する
+         */
+        if (
+          cause instanceof Error &&
+          cause.message === "UNAUTHORIZED"
+        ) {
+          router.replace(
+            "/login?callbackUrl=/purchase/confirm",
+          );
+
+          return null;
+        }
 
         setPurchaseError(
           getErrorMessage(

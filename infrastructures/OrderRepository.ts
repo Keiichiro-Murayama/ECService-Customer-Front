@@ -36,6 +36,7 @@ export class OrderRepository implements IOrderRepository {
 
   /**
    * 商品の購入を確定する
+   *
    * @param purchaseRequest 商品購入情報
    * @returns 商品購入結果
    */
@@ -55,6 +56,13 @@ export class OrderRepository implements IOrderRepository {
       body: JSON.stringify(purchaseRequest),
     });
 
+    /*
+     * 未ログインまたはJWTの有効期限切れの場合
+     */
+    if (response.status === 401) {
+      throw new Error("UNAUTHORIZED");
+    }
+
     if (!response.ok) {
       throw new Error(
         await this.getErrorMessage(
@@ -69,6 +77,7 @@ export class OrderRepository implements IOrderRepository {
 
   /**
    * ログイン中の顧客の購入履歴一覧を取得する
+   *
    * @returns 購入履歴一覧
    */
   async getOrderHistories(): Promise<OrderHistory[]> {
@@ -80,6 +89,13 @@ export class OrderRepository implements IOrderRepository {
       headers: authorizationHeader,
       credentials: "include",
     });
+
+    /*
+     * 未ログインまたはJWTの有効期限切れの場合
+     */
+    if (response.status === 401) {
+      throw new Error("UNAUTHORIZED");
+    }
 
     if (!response.ok) {
       throw new Error(
@@ -108,29 +124,42 @@ export class OrderRepository implements IOrderRepository {
 
   /**
    * 指定した注文の購入履歴詳細を取得する
+   *
    * @param orderUuid 注文UUID
    * @returns 注文明細一覧
    */
   async getOrderDetails(
     orderUuid: string,
   ): Promise<OrderDetail[]> {
-    const normalizedOrderUuid = orderUuid.trim();
+    const normalizedOrderUuid =
+      orderUuid.trim();
 
     if (normalizedOrderUuid.length === 0) {
-      throw new Error("注文UUIDを指定してください。");
+      throw new Error(
+        "注文UUIDを指定してください。",
+      );
     }
 
     const authorizationHeader =
       await this.getAuthorizationHeader();
 
     const response = await fetch(
-      `${this.endpoint}/${encodeURIComponent(normalizedOrderUuid)}`,
+      `${this.endpoint}/${encodeURIComponent(
+        normalizedOrderUuid,
+      )}`,
       {
         method: "GET",
         headers: authorizationHeader,
         credentials: "include",
       },
     );
+
+    /*
+     * 未ログインまたはJWTの有効期限切れの場合
+     */
+    if (response.status === 401) {
+      throw new Error("UNAUTHORIZED");
+    }
 
     if (!response.ok) {
       throw new Error(
@@ -159,6 +188,7 @@ export class OrderRepository implements IOrderRepository {
 
   /**
    * NextAuthのセッションから認証ヘッダーを取得する
+   *
    * @returns Authorizationヘッダー
    */
   private async getAuthorizationHeader(): Promise<
@@ -169,10 +199,15 @@ export class OrderRepository implements IOrderRepository {
 
     const token = session?.user?.token;
 
-    if (!token) {
-      throw new Error(
-        "認証情報を取得できませんでした。再度ログインしてください。",
-      );
+    /*
+     * 未ログインなどによりセッション内に
+     * JWTが存在しない場合
+     */
+    if (
+      typeof token !== "string" ||
+      token.trim() === ""
+    ) {
+      throw new Error("UNAUTHORIZED");
     }
 
     return {
@@ -182,6 +217,7 @@ export class OrderRepository implements IOrderRepository {
 
   /**
    * APIのエラーレスポンスからメッセージを取得する
+   *
    * @param response APIレスポンス
    * @param fallbackMessage メッセージ取得失敗時の既定値
    * @returns エラーメッセージ
