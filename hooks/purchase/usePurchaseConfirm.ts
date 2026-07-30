@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
-import { signOut, useSession } from "next-auth/react";
 import type { IPurchaseConfirmService } from "@/interfaces/IPurchaseConfirmService";
 import type { IPurchaseService } from "@/interfaces/IPurchaseService";
 import type { CartItem } from "@/models/CartItem";
 import type { PaymentMethod } from "@/models/PaymentMethod";
 import type { PurchaseResponse } from "@/models/PurchaseResponse";
-
 
 /**
  * 購入確認ServiceをDIコンテナから取得する
@@ -50,7 +50,7 @@ const getErrorMessage = (
  * 購入確認画面の状態と処理を管理するカスタムフック
  */
 export const usePurchaseConfirm = () => {
-
+  const router = useRouter();
   const { status } = useSession();
 
   /** カート内の商品一覧 */
@@ -97,19 +97,11 @@ export const usePurchaseConfirm = () => {
   /**
    * ログイン画面へ遷移する
    */
-  const redirectToLogin =
-    async (): Promise<void> => {
-      await signOut({
-        redirect: false,
-      });
-
-      document.cookie =
-        "access_token=; path=/; Max-Age=0; SameSite=Lax";
-
-      window.location.assign(
-        "/login?callbackUrl=%2Fpurchase%2Fconfirm",
-      );
-    };
+  const redirectToLogin = (): void => {
+    router.push(
+      "/login?callbackUrl=%2Fpurchase%2Fconfirm",
+    );
+  };
 
   /**
    * 購入確認画面の初期データを取得する
@@ -133,6 +125,9 @@ export const usePurchaseConfirm = () => {
             return;
           }
 
+          /*
+           * 現時点では「現金」のみ選択可能とする
+           */
           const selectablePaymentMethods =
             initialData.paymentMethods.filter(
               (paymentMethod) =>
@@ -150,6 +145,10 @@ export const usePurchaseConfirm = () => {
           setTotalPrice(
             initialData.totalPrice,
           );
+
+          /*
+           * 支払い方法は初期状態では未選択とする
+           */
           setSelectedPaymentMethodId("");
         } catch (cause: unknown) {
           console.error(
@@ -189,6 +188,8 @@ export const usePurchaseConfirm = () => {
 
   /**
    * 支払い方法を変更する
+   *
+   * @param paymentMethodId 支払い方法ID
    */
   const changePaymentMethod = (
     paymentMethodId: string,
@@ -198,12 +199,20 @@ export const usePurchaseConfirm = () => {
 
     setPurchaseError(null);
 
+    /*
+     * 未選択へ戻した場合
+     */
     if (!normalizedPaymentMethodId) {
       setSelectedPaymentMethodId("");
       setValidationError(null);
+
       return;
     }
 
+    /*
+     * APIから取得した支払い方法に
+     * 存在するIDか確認する
+     */
     const existsPaymentMethod =
       paymentMethods.some(
         (paymentMethod) =>
@@ -213,20 +222,25 @@ export const usePurchaseConfirm = () => {
 
     if (!existsPaymentMethod) {
       setSelectedPaymentMethodId("");
+
       setValidationError(
         "支払い方法を選択してください。",
       );
+
       return;
     }
 
     setSelectedPaymentMethodId(
       normalizedPaymentMethodId,
     );
+
     setValidationError(null);
   };
 
   /**
    * 購入内容を検証する
+   *
+   * @returns 正常な場合true
    */
   const validate = (): boolean => {
     setValidationError(null);
@@ -236,6 +250,7 @@ export const usePurchaseConfirm = () => {
       setValidationError(
         "カートに商品がありません。",
       );
+
       return false;
     }
 
@@ -243,6 +258,7 @@ export const usePurchaseConfirm = () => {
       setValidationError(
         "支払い方法を選択してください。",
       );
+
       return false;
     }
 
@@ -257,6 +273,7 @@ export const usePurchaseConfirm = () => {
       setValidationError(
         "支払い方法を選択してください。",
       );
+
       return false;
     }
 
@@ -265,25 +282,40 @@ export const usePurchaseConfirm = () => {
 
   /**
    * 商品の購入を確定する
+   *
+   * @returns
+   * 購入成功時は購入結果、
+   * 失敗時はnull
    */
   const purchase =
-    async (): Promise<
-      PurchaseResponse | null
-    > => {
+    async (): Promise<PurchaseResponse | null> => {
+      /*
+       * 二重送信を防止する
+       */
       if (isPurchasing) {
         return null;
       }
 
-      if (!validate()) {
-        return null;
-      }
-
+      /*
+       * NextAuthの認証状態を確認中
+       */
       if (status === "loading") {
         return null;
       }
 
+      /*
+       * 未ログインの場合はログイン画面へ遷移する
+       */
       if (status === "unauthenticated") {
-        await redirectToLogin();
+        redirectToLogin();
+
+        return null;
+      }
+
+      /*
+       * ログイン済みの場合だけ入力内容を検証する
+       */
+      if (!validate()) {
         return null;
       }
 
@@ -297,6 +329,10 @@ export const usePurchaseConfirm = () => {
             items,
           );
 
+        /*
+         * PurchaseService側で
+         * 購入成功後にカートが空にされる
+         */
         setItems([]);
         setTotalQuantity(0);
         setTotalPrice(0);
@@ -313,15 +349,13 @@ export const usePurchaseConfirm = () => {
             ? cause.message
             : String(cause);
 
-        console.log(
-          "購入エラーメッセージ:",
-          errorMessage,
-        );
+        /*
+         * セッションにJWTがない場合、
+         * またはAPIが401を返した場合
+         */
+        if (errorMessage === "UNAUTHORIZED") {
+          redirectToLogin();
 
-        if (
-          errorMessage === "UNAUTHORIZED"
-        ) {
-          await redirectToLogin();
           return null;
         }
 
@@ -339,18 +373,16 @@ export const usePurchaseConfirm = () => {
   /**
    * 入力エラーを消去する
    */
-  const clearValidationError =
-    (): void => {
-      setValidationError(null);
-    };
+  const clearValidationError = (): void => {
+    setValidationError(null);
+  };
 
   /**
    * 購入エラーを消去する
    */
-  const clearPurchaseError =
-    (): void => {
-      setPurchaseError(null);
-    };
+  const clearPurchaseError = (): void => {
+    setPurchaseError(null);
+  };
 
   return {
     items,
