@@ -6,8 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
  *
  * Azure VM上では、Nginxを経由せずASP.NETへ直接接続する。
  */
-const backendApiUrl =
-  process.env.BACKEND_API_URL ?? "http://127.0.0.1:5001";
+const backendApiUrl = process.env.BACKEND_API_URL ?? "http://127.0.0.1:5001";
 
 /**
  * Next.jsからASP.NET APIへリクエストを中継する
@@ -26,38 +25,73 @@ const proxyRequest = async (
 ): Promise<NextResponse> => {
   const { path } = await context.params;
 
+  const firstPath = path[0];
+
   /**
-   * 顧客アカウント登録APIだけは未ログインでも許可する。
+   * 顧客アカウント登録
    *
    * POST /proxy-api/accounts
    *   ↓
    * POST /api/customer/accounts
+   *
+   * 認証不要
    */
   const isAccountRegistration =
-    request.method === "POST" &&
-    path.length === 1 &&
-    path[0] === "accounts";
+    request.method === "POST" && path.length === 1 && firstPath === "accounts";
 
-  /*
-   * NextAuthのセッションCookieを復号し、
-   * JWTに保存されている情報を取得する。
+  /**
+   * 商品検索・商品詳細取得
+   *
+   * GET /proxy-api/products
+   * GET /proxy-api/products/{productUuid}
+   *
+   * 認証不要
+   */
+  const isProductRequest = request.method === "GET" && firstPath === "products";
+
+  /**
+   * カテゴリ一覧取得
+   *
+   * GET /proxy-api/categories
+   *
+   * 認証不要
+   */
+  const isCategoryRequest =
+    request.method === "GET" && firstPath === "categories";
+
+  /**
+   * 認証不要のAPI
+   *
+   * ordersはここに含めないため、
+   * 購入確定と購入履歴は認証必須になる。
+   */
+  const isPublicRequest =
+    isAccountRegistration || isProductRequest || isCategoryRequest;
+
+  /**
+   * NextAuthのセッションCookieから
+   * JWTに保存されている情報を取得する
    */
   const nextAuthToken = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
 
-  /*
-   * auth.tsでauthorize()の戻り値をJWTへ展開しているため、
-   * バックエンドのJWTはtokenプロパティに保存されている。
+  /**
+   * auth.tsで保存した
+   * ASP.NET用のJWTを取得する
    */
   const accessToken = nextAuthToken?.token;
 
-  /*
-   * アカウント登録以外のAPIは認証を必須にする。
+  /**
+   * 公開API以外は認証必須
+   *
+   * 例：
+   * POST /proxy-api/orders
+   * GET  /proxy-api/orders
    */
   if (
-    !isAccountRegistration &&
+    !isPublicRequest &&
     (typeof accessToken !== "string" || accessToken.trim() === "")
   ) {
     return NextResponse.json(
@@ -70,26 +104,25 @@ const proxyRequest = async (
     );
   }
 
-  /*
+  /**
+   * 転送先URLを作成する
+   *
    * /proxy-api/products
    *        ↓
    * /api/customer/products
    */
-  const backendUrl = new URL(
-    `/api/customer/${path.join("/")}`,
-    backendApiUrl,
-  );
+  const backendUrl = new URL(`/api/customer/${path.join("/")}`, backendApiUrl);
 
-  // categoryUuidなどのクエリパラメータを引き継ぐ
+  /**
+   * categoryUuidなどの
+   * クエリパラメータを引き継ぐ
+   */
   backendUrl.search = request.nextUrl.search;
 
   const headers = new Headers();
 
-  /*
-   * リクエストのContent-Typeを引き継ぐ。
-   *
-   * multipart/form-dataの場合もboundaryを含めた値を
-   * そのまま転送する必要がある。
+  /**
+   * Content-Typeを引き継ぐ
    */
   const contentType = request.headers.get("content-type");
 
@@ -97,48 +130,51 @@ const proxyRequest = async (
     headers.set("Content-Type", contentType);
   }
 
+  /**
+   * Acceptを引き継ぐ
+   */
   const accept = request.headers.get("accept");
 
   if (accept) {
     headers.set("Accept", accept);
   }
 
-  /*
-   * アカウント登録以外では、
-   * NextAuthのCookieに保存されていたJWTを
-   * ASP.NETが認証できるBearerトークンとして付与する。
+  /**
+   * 認証必須APIにだけ
+   * Bearerトークンを付ける
    */
   if (
-    !isAccountRegistration &&
+    !isPublicRequest &&
     typeof accessToken === "string" &&
     accessToken.trim() !== ""
   ) {
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
-  const hasBody =
-    request.method !== "GET" && request.method !== "HEAD";
+  /**
+   * GETとHEAD以外は
+   * リクエストボディを転送する
+   */
+  const hasBody = request.method !== "GET" && request.method !== "HEAD";
 
   try {
     const backendResponse = await fetch(backendUrl, {
       method: request.method,
       headers,
-      body: hasBody
-        ? await request.arrayBuffer()
-        : undefined,
+      body: hasBody ? await request.arrayBuffer() : undefined,
       cache: "no-store",
     });
 
     const responseHeaders = new Headers();
 
-    const responseContentType =
-      backendResponse.headers.get("content-type");
+    /**
+     * バックエンドから返された
+     * Content-Typeを引き継ぐ
+     */
+    const responseContentType = backendResponse.headers.get("content-type");
 
     if (responseContentType) {
-      responseHeaders.set(
-        "Content-Type",
-        responseContentType,
-      );
+      responseHeaders.set("Content-Type", responseContentType);
     }
 
     return new NextResponse(backendResponse.body, {
@@ -146,10 +182,7 @@ const proxyRequest = async (
       headers: responseHeaders,
     });
   } catch (error) {
-    console.error(
-      "バックエンドAPIへの接続に失敗しました。",
-      error,
-    );
+    console.error("バックエンドAPIへの接続に失敗しました。", error);
 
     return NextResponse.json(
       {
